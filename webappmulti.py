@@ -14,7 +14,7 @@ October 2009, February 2015
 """
 
 import socket
-
+import random
 
 class app:
     """Application to which webApp dispatches. Does the real work
@@ -98,8 +98,70 @@ class webApp:
                             + htmlAnswer + "\r\n")
             recvSocket.close()
 
+class holaApp(app):
+	def process(self,parsedRequest):
+		return ("200 OK", "<html><body><h1>" +
+                          "Hola mundo" +
+                          "</h1></body></html>")
+                          
+class adiosApp(app):
+	def process(self,parsedRequest):
+		return ("200 OK", "<html><body><h1>" +
+                          "Adios mundo" +
+                          "</h1></body></html>")                          
+
+class sumaApp(app):
+	def parse(self, request, rest):
+		paquete = rest.split('/')[1:]
+		# paquete es una lista con [num1, num2]
+		return paquete
+		
+	def process(self,parsedRequest):
+		suma = int(parsedRequest[0]) + int(parsedRequest[1])
+		return ("200 OK", "<html><body><h1>" +
+                          "La suma es" +
+                          "</h1><p>" + parsedRequest[0] + " + " + parsedRequest[1] + " = " + str(suma) + "</body></html>")
+                          
+class aleatApp(app):
+
+	def process(self, parsedRequest):
+		return ("200 OK", "<html><body><h1>ALEATORIO</h1><p><a href='http://localhost:1234/aleat/"+
+				str(random.randrange(10000000000000)) +
+				"'>Dame Otra!!</a></p></body></html>")
+				
+class githubApp(app):
+	
+	def parse(self, request, rest):
+		paquete = rest.split('/')[1:]
+		return paquete
+		
+	def process(self, parsedRequest):
+		if parsedRequest[0]:
+			if parsedRequest[0] == "code":
+				return ("200 OK", "<html><body><h1>CODE</h1>" + 
+						"<p><a href='https://github.com/dlumbrer/X-Serv-14.8-ServVariasApps'>Aqui tienes el codigo</a></p>" +
+						"</body></html>")
+			elif parsedRequest[0] == "who":
+				return ("200 OK", "<html><body><h1>Yo soy</h1>" + 
+						"<p><a href='https://github.com/dlumbrer/'>David Moreno Lumbreras</a></p>" +
+						"</body></html>")
+						
+		return ("200 OK", "<html><body><h1>UY</h1>" +
+				"<p><a href='http://localhost:1234/github/code'>Quieres ver el codigo?</a></p>" + 
+				"<p><a href='http://localhost:1234/github/who'>Quieres saber quien soy?</a></p></body></html>")                    
+
 if __name__ == "__main__":
     anApp = app()
     otherApp = app()
+    hola = holaApp()
+    adios = adiosApp()
+    suma = sumaApp()
+    aleatorio = aleatApp()
+    github = githubApp()
     testWebApp = webApp("localhost", 1234, {'/app': anApp,
-                                            '/other': otherApp})
+                                            '/other': otherApp,
+                                            '/hola': hola,
+                                            '/adios': adios,
+                                            '/suma': suma,
+                                            '/aleat': aleatorio,
+                                            '/github': github})
